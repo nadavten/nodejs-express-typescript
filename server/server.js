@@ -1,33 +1,26 @@
 "use strict";
+var productsController_1 = require("./controllers/productsController");
 var express = require("express");
 var utils_1 = require("../common/utils");
 var Server = (function () {
     function Server() {
-        var _this = this;
-        this.port = 4000;
         this.app = express();
-        this.app.listen(this.port, function (error) {
-            if (error == null) {
-                console.log("app running on port " + _this.port);
+        var port = process.env.port || 4000;
+        this.app.listen(port, function (err) {
+            if (err == null) {
+                console.log("app running on port " + port);
             }
         });
+        //MIDDLEWARE
         this.app.use(express.static(utils_1.Utils.APP_STATIC));
-        this.initRoutes();
+        this.app.use('/', function (req, res, next) {
+            console.log("request url: " + req.url);
+            next();
+        });
+        this.app.use('/products', productsController_1.productsController);
     }
     Server.Start = function () {
         return new Server();
-    };
-    Server.prototype.initRoutes = function () {
-        this.app.get('/articles', function (req, res) {
-            res.send('<h1>articles</h1>');
-        });
-        this.productsRouter = express.Router();
-        this.productsRouter
-            .route('/')
-            .get(function (req, res) {
-            res.sendFile(utils_1.Utils.APP_ROOT + "/" + utils_1.Utils.APP_STATIC + "/products.html");
-        });
-        this.app.use('/products', this.productsRouter);
     };
     return Server;
 }());

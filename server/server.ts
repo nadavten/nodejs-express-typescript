@@ -1,15 +1,11 @@
+import { productsController } from './controllers/productsController';
 import * as express from 'express';
-import * as path from 'path';
 
 import {Utils} from '../common/utils';
 
 export class Server{
-
-    private port = 4000;
     
     app : express.Application;
-
-    productsRouter : express.Router;
 
     static Start() {
 
@@ -20,35 +16,26 @@ export class Server{
 
         this.app = express();
 
-        this.app.listen(this.port,(error:any)=>{
+        let port = process.env.port || 4000;
 
-            if(error==null){
-                console.log(`app running on port ${this.port}`);
+        this.app.listen(port,(err:any)=>{
+
+            if(err==null){
+                console.log(`app running on port ${port}`);
             }
         });
 
+
+        //MIDDLEWARE
         this.app.use(express.static(Utils.APP_STATIC));
 
-        this.initRoutes();
-    }
+        this.app.use('/',(req,res,next)=>{
 
-    private initRoutes(){
-
-        this.app.get('/articles',(req,res)=>{
-
-            res.send('<h1>articles</h1>');
+            console.log(`request url: ${req.url}`);
+            next();
         });
 
-        this.productsRouter = express.Router();
-
-        this.productsRouter
-            .route('/')
-            .get((req,res)=>{
-                res.sendFile(`${Utils.APP_ROOT}/${Utils.APP_STATIC}/products.html`);
-        });
-
-        this.app.use('/products',this.productsRouter);
-
+        this.app.use('/products',productsController);
     }
 
 }
